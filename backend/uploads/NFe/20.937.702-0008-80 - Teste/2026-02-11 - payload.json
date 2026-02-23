@@ -1,0 +1,42 @@
+{
+  "contabilidade": {
+    "nome": "Bruno",
+    "telefone": "(37) 99843-4444"
+  },
+  "empresa": {
+    "razaoSocial": "Teste",
+    "cnpj": "20.937.702/0008-80",
+    "ie": "11232331",
+    "crt": "Simples Nacional",
+    "certSenha": null
+  },
+  "documentos": {
+    "selecionados": [
+      "NFe"
+    ],
+    "nfeNfceMesmosDados": false
+  },
+  "configPorDocumento": {
+    "NFe": {
+      "ambiente": "Producao",
+      "serie": "1",
+      "ultimoNumero": "2",
+      "icms": {
+        "tipo": "CSOSN",
+        "codigo": "102",
+        "cfop": "5102/6102",
+        "aliquota": null
+      },
+      "pisCofins": {
+        "pisSituacao": "08",
+        "pisAliquota": null,
+        "cofinsSituacao": "08",
+        "cofinsAliquota": null
+      },
+      "obs": null
+    }
+  },
+  "reformaTributaria": {
+    "habilitar": false
+  }
+}

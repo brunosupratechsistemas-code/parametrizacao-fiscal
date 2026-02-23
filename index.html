@@ -1,0 +1,1178 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Parametrização Fiscal</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+  <img src="https://firebasestorage.googleapis.com/v0/b/controle-clientes-3a04b.firebasestorage.app/o/Logo%20frente%20caixa.png?alt=media&token=d1afa7d6-ad34-4527-8fb6-2db8da5882a4" alt="SupraTech" />
+  <div>
+    <h1>Parametrização Fiscal</h1>
+    <p>Configuração inteligente de documentos fiscais</p>
+  </div>
+</div>
+
+    </header>
+
+<div class="steps">
+  <button class="step active" data-step="0">1. Contabilidade</button>
+  <button class="step" data-step="1">2. Empresa</button>
+  <button class="step" data-step="2">3. Documentos</button>
+  <button class="step" data-step="3">4. Configuração por Documento</button>
+  <button class="step" data-step="4">5. Reforma Tributária</button>
+  <button class="step" data-step="5">6. Revisão</button>
+</div>
+
+    <form id="formWizard">
+      <!-- STEP 0 -->
+      <section class="panel show" data-panel="0">
+        <h2>Contabilidade</h2>
+
+        <label>Nome da contabilidade *
+          <input type="text" id="cont_nome" required />
+        </label>
+
+        <label>Telefone/WhatsApp *
+          <input type="tel" id="cont_tel" required />
+        </label>
+      </section>
+
+      <!-- STEP 1 -->
+      <section class="panel" data-panel="1">
+        <h2>Empresa</h2>
+
+        <label>Razão Social *
+          <input type="text" id="emp_razao" required />
+        </label>
+
+        <label> CNPJ/CPF *
+        <input type="text" id="emp_cnpj" required />
+
+        </label>
+
+
+        <label>Inscrição Estadual *
+          <input type="text" id="emp_ie" inputmode="numeric" pattern="[0-9]*" required />
+        </label>
+
+        <label>CRT *
+          <select id="emp_crt" required>
+            <option value="">Selecione</option>
+            <option value="MEI">MEI</option>
+            <option value="Simples Nacional">Simples Nacional</option>
+            <option value="Simples Nacional - Excesso de sublimite da receita bruta">Simples Nacional - Excesso de sublimite da receita bruta</option>
+            <option value="Lucro Real">Lucro Real</option>
+            <option value="Lucro Presumido">Lucro Presumido</option>
+
+          </select>
+        </label>
+
+  <label class="fileBox">
+  <span id="certLabel">📎 Selecionar certificado digital (.pfx)</span>
+  <input type="file" id="emp_cert" accept=".pfx,.p12" required />
+</label>
+<label class="certPassBox">
+  <span>🔐 Senha do certificado digital *</span>
+  <input
+    type="text"
+    id="emp_cert_senha"
+    placeholder="Digite a senha do certificado"
+    required
+  />
+</label>
+
+<div class="info warn">
+  A senha é usada apenas para validação do certificado e não será exibida no resumo.
+</div>
+
+
+
+
+
+        <div class="info" id="info_crt">
+          Se CRT for MEI/Simples, você usará CSOSN. Se Regime Normal, você usará CST.
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+     <section class="panel" data-panel="2">
+  <h2>Documentos emitidos</h2>
+
+  <div class="docGrid">
+    <label class="docItem">
+      <input type="checkbox" value="NFe" class="docCheck" />
+      <span class="checkmark"></span>
+      <strong>NF-e</strong>
+    </label>
+
+    <label class="docItem">
+      <input type="checkbox" value="NFCe" class="docCheck" />
+      <span class="checkmark"></span>
+      <strong>NFC-e</strong>
+    </label>
+
+    <label class="docItem">
+      <input type="checkbox" value="NFSe" class="docCheck" />
+      <span class="checkmark"></span>
+      <strong>NFS-e</strong>
+    </label>
+
+    <label class="docItem">
+      <input type="checkbox" value="CTe" class="docCheck" />
+      <span class="checkmark"></span>
+      <strong>CT-e</strong>
+    </label>
+
+    <label class="docItem">
+      <input type="checkbox" value="CTeOS" class="docCheck" />
+      <span class="checkmark"></span>
+      <strong>CT-e OS</strong>
+    </label>
+
+    <label class="docItem">
+      <input type="checkbox" value="MDFe" class="docCheck" />
+      <span class="checkmark"></span>
+      <strong>MDF-e</strong>
+    </label>
+
+    <label class="docItem wide">
+      <input type="checkbox" value="NFeEFD" class="docCheck" />
+      <span class="checkmark"></span>
+      <strong>NF-e Regime Normal</strong>
+      <small>EFD Contribuições</small>
+    </label>
+  </div>
+
+  <div class="docBox" id="box_nfe_nfce" style="display:none;">
+    <h3>NF-e e NFC-e</h3>
+
+    <label class="docItem inline">
+      <input type="checkbox" id="nfe_nfce_mesmo" />
+      <span class="checkmark"></span>
+      Usar os mesmos dados para NF-e e NFC-e
+    </label>
+  </div>
+</section>
+
+
+<section class="panel" data-panel="3">
+  <h2>Configuração por documento</h2>
+
+  <!-- Abas dinâmicas -->
+  <div class="docTabs" id="docTabs"></div>
+
+  <!-- Conteúdo das abas -->
+  <div id="docTabContent"></div>
+
+  <!-- Template base (comum a todos) -->
+  <template id="tplDocBase">
+    <div class="docCard">
+      <h3 class="docTitle"></h3>
+      <div class="docBody"></div>
+
+      
+    </div>
+  </template>
+
+
+<template id="tplNFe">
+  <div class="rule-card simplesPadrao" style="display:none;">
+  <h3>Preenchimento padrão (Simples Nacional)</h3>
+
+  <label class="check">
+    <input type="radio" name="padraoSimplesNFe" value="normal">
+    Simples Nacional (Venda normal)
+    <small>CSOSN 102 · CFOP 5102/6102 · PIS/COFINS 08</small>
+  </label>
+
+  <label class="check">
+    <input type="radio" name="padraoSimplesNFe" value="st">
+    Simples Nacional (Substituição Tributária)
+    <small>CSOSN 500 · CFOP 5405/6405 · PIS/COFINS 08</small>
+  </label>
+</div>
+<div class="rule-card">
+        <label>Série na ultima NF-e
+          <input type="text" class="serie" placeholder="Ex.: 1" required />
+        </label>
+
+        <label>Número da última NF-e
+          <input type="number" class="ultimoNumero" placeholder="Ex: 1548" required />
+        </label>
+      </div>
+  <div class="rule-card">
+    
+    <h3>ICMS</h3>
+
+    <div class="grid-icms-custom">
+      <label>Origem *
+        <select class="origem" required>
+          <option value="">Selecione</option>
+          <option value="0">0 - Nacional</option>
+          <option value="1">1 - Estrangeira</option>
+        </select>
+      </label>
+
+       <label class="cst-col">
+  CST / CSOSN *
+  <select class="icmsCodigo" required></select>
+</label>
+
+      <label>Alíquota ICMS (%)
+        <input type="number" step="0.01" class="icmsAliquota" />
+      </label>
+
+      <label>CFOP (Dentro/Fora UF) *
+        <input type="number" class="icmsCfop" placeholder="5102/6102" required />
+      </label>
+    </div>
+  </div>
+
+    <h3>PIS / COFINS</h3>
+
+    <!-- mantém exatamente como já está -->
+    <div class="pisCofinsMount"></div>
+
+
+  <div class="rule-card">
+  <h3>Observações</h3>
+  <textarea class="obs" placeholder="Informações adicionais..."></textarea>
+</div>
+
+
+</template>
+
+<template id="tplNFCe">
+  <div class="rule-card simplesPadrao" style="display:none;">
+  <h3>Preenchimento padrão (Simples Nacional)</h3>
+
+  <label class="check">
+    <input type="radio" name="padraoSimplesNFCe" value="normal">
+    Simples Nacional (Venda normal)
+    <small>CSOSN 102 · CFOP 5102/6102 · PIS/COFINS 08</small>
+  </label>
+
+  <label class="check">
+    <input type="radio" name="padraoSimplesNFCe" value="st">
+    Simples Nacional (Substituição Tributária)
+    <small>CSOSN 500 · CFOP 5405/6405 · PIS/COFINS 08</small>
+  </label>
+</div>
+<div class="rule-card">
+
+        <label>Série do ultmo NFC-e *
+          <input type="text" class="serie" placeholder="Ex.: 1" required />
+        </label>
+
+        <label>Número da última NFC-e *
+          <input type="number" class="ultimoNumero" placeholder="Ex: 1548" required />
+        </label>
+      </div>
+  <div class="rule-card">
+    <label>CSC *
+      <input type="text" class="nfce-csc" required />
+    </label>
+
+    <label>Token CSC *
+      <input type="text" class="nfce-token" required />
+    </label>
+  </div>
+
+  <div class="rule-card">
+    <h3>ICMS</h3>
+
+    <div class="grid-icms-custom">
+      <label>Origem *
+        <select class="origem" required>
+          <option value="">Selecione</option>
+          <option value="0">0 - Nacional</option>
+          <option value="1">1 - Estrangeira</option>
+        </select>
+      </label>
+
+      <label class="cst-col">
+  CST / CSOSN *
+  <select class="icmsCodigo" required></select>
+</label>
+
+
+      <label>Alíquota ICMS (%)
+        <input type="number" step="0.01" class="icmsAliquota" />
+      </label>
+
+      <label>CFOP (Dentro do Estado) *
+        <input type="text" class="icmsCfop" placeholder="5102" required />
+      </label>
+    </div>
+  </div>
+
+  <div class="pisCofinsMount"></div>
+
+
+   <div class="rule-card">
+  <h3>Observações</h3>
+  <textarea class="obs" placeholder="Informações adicionais..."></textarea>
+</div>
+</template>
+<template id="tplCTe">
+  <div class="rule-card">
+    <label>Último CT-e *
+      <input type="number" class="cte-numero" placeholder="Ex: 1" required />
+    </label>
+
+    <label>Série CT-e *
+      <input type="text" class="cte-serie"  placeholder="Ex: 250" required />
+    </label>
+
+    <label>RNTRC *
+      <input type="text" class="cte-rntrc" required />
+    </label>
+
+    <label>CFOP *
+      <input type="text" class="cte-cfop" required />
+    </label>
+
+    <label>CST *
+      <select class="cte-cst" required>
+        <option value="">Selecione</option>
+        <option value="00">00 - Tributada integralmente</option>
+        <option value="20">20 - Redução BC</option>
+        <option value="40">40 - Isenta</option>
+        <option value="41">41 - Não tributada</option>
+        <option value="51">51 - Diferimento</option>
+        <option value="60">60 - ICMS ST</option>
+        <option value="90">90 - Outras</option>
+      </select>
+    </label>
+
+    <label>Alíquota ICMS
+      <input type="number" step="0.01" class="cte-aliquota" />
+    </label>
+  </div>
+
+   <div class="rule-card">
+  <h3>Observações</h3>
+  <textarea class="obs" placeholder="Informações adicionais..."></textarea>
+</div>
+</template>
+<template id="tplMDFe">
+  <div class="rule-card">
+    <label>Série MDF-e *
+      <input type="text" class="mdfe-serie"  placeholder="Ex: 1" required />
+    </label>
+
+    <label>Último número MDF-e *
+      <input type="number" class="mdfe-numero" placeholder="Ex: 1858" required />
+    </label>
+
+    <label>Tipo de Transportador *
+      <select class="mdfe-tipo-transp" required>
+        <option value="">Selecione</option>
+        <option value="ETC">ETC - Empresa Transporte Rodoviário de Carga</option>
+        <option value="TAC">TAC - Transportador Autônomo de Carga</option>
+        <option value="CTC">CTC - Cooperativa de Transporte Rodoviário de Carga</option>
+      </select>
+    </label>
+
+    <label>RNTRC *
+      <input type="text" class="mdfe-rntrc" required />
+    </label>
+
+    <label>Tipo do Emitente *
+      <select class="mdfe-tipo-emit" required>
+        <option value="">Selecione</option>
+        <option value="1">1 - Prestador de Serviço de Transporte</option>
+        <option value="2">2 - Transportador de Carga Própria</option>
+        <option value="3">3 - Prestador de serviço de transporte que emitirá CTe Globalizado</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="rule-card">
+  <h3>Observações</h3>
+  <textarea class="obs" placeholder="Informações adicionais..."></textarea>
+</div>
+</template>
+
+<template id="tplNFeEFD">
+  <div class="rule-card">
+        <label>Série na ultima NF-e
+          <input type="text" class="serie" placeholder="Ex.: 1" required />
+        </label>
+
+        <label>Número da última NF-e
+          <input type="number" class="ultimoNumero" placeholder="Ex: 1548" required />
+        </label>
+      </div>
+
+  <!-- 1) Plano de Contas / EFD -->
+
+  <div class="rule-card">
+    <h3>EFD – Plano de Contas</h3>
+
+  <label class="fileBox">
+    <span id="efdPlanoLabel">📎 Selecionar Plano de Contas Contábeis</span>
+    <input type="file" class="efd-plano-arquivo" />
+  </label>
+
+      <label>Máscara do Plano de Contas Contábil *
+        <input type="text" class="efd-mascara-plano" required />
+      </label>
+
+      <label>Tipo Plano de Conta Referencial *
+        <select class="efd-tipo-plano" required>
+          <option value="">Selecione</option>
+          <option value="1">1 - PJ em Geral (L100A + L300A da ECF)</option>
+          <option value="2">2 - PJ em Geral - Lucro Presumido (P100 + P150 da ECF)</option>
+          <option value="3">3 - Financeiras (L100B + L300B da ECF)</option>
+          <option value="4">4 - Seguradoras (L100C + L300C da ECF)</option>
+          <option value="5">5 - Imunes e Isentas (U100A + U150A da ECF)</option>
+          <option value="6">6 - Financeiras - Imunes/Isentas (U100B + U150A da ECF)</option>
+          <option value="7">7 - Seguradoras - Imunes/Isentas (U100C + U150B da ECF)</option>
+          <option value="8">8 - Entidades Fechadas Previdência (U100D + U150D da ECF)</option>
+          <option value="9">9 - Partidos Políticos (U100E + U150E da ECF)</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- 2) Identificação NF-e -->
+  <!-- 3) Indicadores EFD Contribuições -->
+  <div class="rule-card">
+    <h3>Indicadores EFD Contribuições</h3>
+
+    <div class="grid-efd-indicadores">
+      <label>Tipo de Atividade *
+        <select class="efd-atividade" required>
+          <option value="">Selecione</option>
+          <option value="0">0 - Industrial ou equiparado</option>
+          <option value="1">1 - Prestador de serviços</option>
+          <option value="2">2 - Comércio</option>
+          <option value="3">3 - PJ (Lei 9.718/1998 art.3)</option>
+          <option value="4">4 - Atividade imobiliária</option>
+          <option value="9">9 - Outros</option>
+        </select>
+      </label>
+
+      <label >Natureza da Pessoa Jurídica*
+        <select  class="efd-natureza-pj" required>
+          <option value="">Selecione</option>
+          <option value="00">00 – PJ em geral</option>
+          <option value="01">01 – Sociedade cooperativa</option>
+          <option value="02">02 – PIS/Pasep pela Folha</option>
+          <option value="03">03 – PJ em geral (SCP sócia ostensiva)</option>
+          <option value="04">04 – Cooperativa (SCP sócia ostensiva)</option>
+          <option value="05">05 – Sociedade em Conta de Participação (SCP)</option>
+        </select>
+      </label>
+          
+      <label>Indicador de Incidência no Período *
+        <select class="efd-incidencia" required>
+          <option value="">Selecione</option>
+          <option value="1">1 - Exclusivamente não-cumulativo</option>
+          <option value="2">2 - Exclusivamente cumulativo</option>
+          <option value="3">3 - Ambos</option>
+        </select>
+      </label>
+
+      <label>Método de Apropriação de Créditos Comuns *
+        <select class="efd-metodo-creditos" required>
+          <option value="">Selecione</option>
+          <option value="1">1 - Apropriação Direta</option>
+          <option value="2">2 - Rateio Proporcional (Receita Bruta)</option>
+        </select>
+      </label>
+
+      <label>Tipo de Contribuição Apurada *
+        <select class="efd-tipo-contrib" required>
+          <option value="">Selecione</option>
+          <option value="1">1 - Alíquota Básica</option>
+          <option value="2">2 - Alíquotas Específicas</option>
+        </select>
+      </label>
+
+      <label>Motivo EFD sem movimento*
+        <select class="efd-motivo-sem-mov" required>
+          <option value="">Selecione</option>
+          <option value="01">01 - PJ imune/isenta IRPJ</option>
+          <option value="02">02 - Órgãos públicos/autarquias</option>
+          <option value="03">03 - PJ inativa</option>
+          <option value="04">04 - PJ sem operações geradoras</option>
+          <option value="05">05 - SCP sem operações geradoras</option>
+          <option value="06">06 - Cooperativa sem operações</option>
+          <option value="07">07 - Incorporação/fusão/cisão</option>
+          <option value="99">99 - Demais hipóteses</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- 4) Códigos de Receita -->
+  <div class="rule-card">
+    <h3>Códigos de Receita (EFD)</h3>
+
+    <div class="grid2">
+      <label>Código Receita COFINS *
+        <select class="efd-receita-cofins" required>
+          <option value="">Selecione</option>
+          <option value="217201">217201 - Faturamento - PJ geral (cumulativo)</option>
+          <option value="585601">585601 - Não cumulativa</option>
+          <option value="217208">217208 - Faturamento - PJ geral (cumulativo) - SCP</option>
+          <option value="585608">585608 - Não cumulativa - SCP</option>
+          <option value="077603">077603 - Regime Especial - Bebidas</option>
+          <option value="077604">077604 - Regime Especial - Bebidas - SCP</option>
+          <option value="092901">092901 - RECOB - Álcool</option>
+          <option value="092902">092902 - RECOB - Álcool - SCP</option>
+          <option value="184001">184001 - ST revenda alíquotas diferenciadas (art.64)</option>
+          <option value="184002">184002 - ST revenda alíquotas diferenciadas (art.65)</option>
+          <option value="184003">184003 - ST revenda alíquotas diferenciadas (art.64) - SCP</option>
+          <option value="184004">184004 - ST revenda alíquotas diferenciadas (art.65) - SCP</option>
+          <option value="217202">217202 - Faturamento - ART 10 IN SRF 23/97</option>
+          <option value="217204">217204 - ST cigarros</option>
+          <option value="217209">217209 - ST cigarros - SCP</option>
+          <option value="684001">684001 - Combustíveis</option>
+          <option value="684008">684008 - Combustíveis - SCP</option>
+          <option value="798701">798701 - Entidades financeiras/equiparadas</option>
+          <option value="864501">864501 - ST veículos</option>
+          <option value="864508">864508 - ST veículos - SCP</option>
+          <option value="778401">778401 - Cumulativa - Trans Navios</option>
+          <option value="778402">778402 - Não cumulativa - Trans Navios</option>
+          <option value="217216">217216 - Perda benefício (PJ geral)</option>
+          <option value="217217">217217 - Perda benefício (PJ geral) - SCP</option>
+          <option value="585616">585616 - Não cumulativa - Perda benefício</option>
+          <option value="585617">585617 - Não cumulativa - Perda benefício - SCP</option>
+        </select>
+      </label>
+
+      <label>Código Receita PIS *
+        <select class="efd-receita-pis" required>
+          <option value="">Selecione</option>
+          <option value="810902">810902 - Faturamento - PJ geral (cumulativo)</option>
+          <option value="691201">691201 - Não cumulativo</option>
+          <option value="810908">810908 - Faturamento - PJ geral (cumulativo) - SCP</option>
+          <option value="691208">691208 - Não cumulativo - SCP</option>
+          <option value="069103">069103 - Regime Especial - Bebidas</option>
+          <option value="069104">069104 - Regime Especial - Bebidas - SCP</option>
+          <option value="090601">090601 - RECOB - Álcool</option>
+          <option value="090602">090602 - RECOB - Álcool - SCP</option>
+          <option value="192101">192101 - ST revenda alíquotas diferenciadas (art.64)</option>
+          <option value="192102">192102 - ST revenda alíquotas diferenciadas (art.65)</option>
+          <option value="192103">192103 - ST revenda alíquotas diferenciadas (art.64) - SCP</option>
+          <option value="192104">192104 - ST revenda alíquotas diferenciadas (art.65) - SCP</option>
+          <option value="810903">810903 - Arts. 21 IN SRF 419/04 e 25 IN SRF 420/04</option>
+          <option value="810907">810907 - ST cigarros</option>
+          <option value="810909">810909 - ST cigarros - SCP</option>
+          <option value="457401">457401 - Entidades financeiras/equiparadas</option>
+          <option value="682401">682401 - Combustíveis</option>
+          <option value="682408">682408 - Combustíveis - SCP</option>
+          <option value="849601">849601 - ST veículos</option>
+          <option value="849608">849608 - ST veículos - SCP</option>
+          <option value="779701">779701 - Cumulativo - Trans Navios</option>
+          <option value="779702">779702 - Não cumulativo - Trans Navios</option>
+          <option value="370301">370301 - PJ direito público</option>
+          <option value="830102">830102 - Folha de salários</option>
+          <option value="810916">810916 - Perda benefício</option>
+          <option value="810917">810917 - Perda benefício - SCP</option>
+          <option value="691216">691216 - Não cumulativo - Perda benefício</option>
+          <option value="691217">691217 - Não cumulativo - Perda benefício - SCP</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- 5) ICMS (CST/CSOSN) -->
+  <div class="rule-card">
+    <h3>ICMS</h3>
+      <label>Origem *
+        <select class="efd-origem" required>
+          <option value="">Selecione</option>
+          <option value="0">0 - Nacional</option>
+          <option value="1">1 - Estrangeira</option>
+        </select>
+      </label>
+    <div >
+      <label>CST/CSOSN ICMS *
+        <select class="icmsCodigo" required></select>
+      </label>
+
+     
+    </div>
+    <div class="grid-icms-efd">
+       <label>Alíquota CST/CSOSN (caso tenha) *
+        <input type="number" step="0.01" class="icmsAliquota" required />
+      </label>
+
+      <label>CFOP (Dentro/Fora UF) *
+        <input type="text" class="icmsCfop" placeholder="5102/6102" required />
+      </label>
+      
+    </div>
+    
+  </div>
+
+  <!-- 6) IPI -->
+  <div class="rule-card">
+    <h3>IPI</h3>
+
+    <div class="grid-efd-indicadores">
+      <label>CST IPI Saída (caso necessário)
+        <select class="ipi-cst-saida">
+          <option value="">Selecione</option>
+          <option value="00">00 - Entrada com Recuperação de Crédito</option>
+          <option value="01">01 - Entrada Tributável Alíquota Zero</option>
+          <option value="02">02 - Entrada Isenta</option>
+          <option value="03">03 - Entrada Não-Tributada</option>
+          <option value="04">04 - Entrada Imune</option>
+          <option value="05">05 - Entrada com Suspensão</option>
+          <option value="49">49 - Outras Entradas</option>
+          <option value="50">50 - Saída Tributada</option>
+          <option value="51">51 - Saída Alíquota Zero</option>
+          <option value="52">52 - Saída Isenta</option>
+          <option value="53">53 - Saída Não-Tributada</option>
+          <option value="54">54 - Saída Imune</option>
+          <option value="55">55 - Saída com Suspensão</option>
+          <option value="99">99 - Outras Saídas</option>
+        </select>
+      </label>
+
+      <label>Alíquota IPI (caso houver)
+        <input type="number" step="0.01" class="ipi-aliquota" />
+      </label>
+
+      <label>Classe Enquadramento IPI *
+        <input type="text" class="ipi-classe" required />
+      </label>
+
+      <label>Selo IPI *
+        <input type="text" class="ipi-selo" required />
+      </label>
+
+      <label>Quantidade Selo Controle *
+        <input type="number" class="ipi-qtd-selo" required />
+      </label>
+
+      <label>Código Enquadramento Legal *
+        <input type="text" class="ipi-cod-legal" required />
+      </label>
+
+      <label>CST IPI Entrada *
+        <select class="ipi-cst-entrada" required>
+          <option value="">Selecione</option>
+          <option value="00">00 - Entrada com Recuperação de Crédito</option>
+          <option value="01">01 - Entrada Tributável Alíquota Zero</option>
+          <option value="02">02 - Entrada Isenta</option>
+          <option value="03">03 - Entrada Não-Tributada</option>
+          <option value="04">04 - Entrada Imune</option>
+          <option value="05">05 - Entrada com Suspensão</option>
+          <option value="49">49 - Outras Entradas</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- 7) PIS/COFINS (EFD - Saída / Entrada) -->
+  <div class="rule-card">
+    <h3>PIS/COFINS (EFD)</h3>
+
+    <div class="grid2">
+      <label>PIS/COFINS SAÍDA *
+        <select class="efd-piscofins-saida" required>
+          <option value="">Selecione</option>
+          <option value="01">01 - Tributável Alíquota Básica</option>
+          <option value="02">02 - Tributável Alíquota Diferenciada</option>
+          <option value="03">03 - Tributável por Unidade</option>
+          <option value="04">04 - Monofásica Revenda Alíquota Zero</option>
+          <option value="05">05 - ST</option>
+          <option value="06">06 - Alíquota Zero</option>
+          <option value="07">07 - Isenta</option>
+          <option value="08">08 - Sem Incidência</option>
+          <option value="09">09 - Suspensão</option>
+          <option value="49">49 - Outras Saídas</option>
+          <option value="99">99 - Outras Operações</option>
+        </select>
+      </label>
+
+      <label>PIS/COFINS ENTRADA *
+        <select class="efd-piscofins-entrada" required>
+          <option value="">Selecione</option>
+          <option value="50">50 - Crédito (Receita Tributada - Mercado Interno)</option>
+          <option value="51">51 - Crédito (Receita Não Tributada - Mercado Interno)</option>
+          <option value="52">52 - Crédito (Exportação)</option>
+          <option value="53">53 - Crédito (Receitas Trib/Não Trib - Mercado Interno)</option>
+          <option value="54">54 - Crédito (Mercado Interno e Exportação)</option>
+          <option value="55">55 - Crédito (Não Trib - Interno e Exportação)</option>
+          <option value="56">56 - Crédito (Trib/Não Trib - Interno e Exportação)</option>
+          <option value="60">60 - Crédito Presumido (Tributada - Interno)</option>
+          <option value="61">61 - Crédito Presumido (Não Trib - Interno)</option>
+          <option value="62">62 - Crédito Presumido (Exportação)</option>
+          <option value="63">63 - Crédito Presumido (Trib/Não Trib - Interno)</option>
+          <option value="64">64 - Crédito Presumido (Interno e Exportação)</option>
+          <option value="65">65 - Crédito Presumido (Não Trib - Interno e Exportação)</option>
+          <option value="66">66 - Crédito Presumido (Trib/Não Trib - Interno e Exportação)</option>
+          <option value="67">67 - Crédito Presumido (Outras)</option>
+          <option value="70">70 - Aquisição sem direito a crédito</option>
+          <option value="71">71 - Aquisição com Isenção</option>
+          <option value="72">72 - Aquisição com Suspensão</option>
+          <option value="73">73 - Aquisição com Alíquota Zero</option>
+          <option value="74">74 - Aquisição sem Incidência</option>
+          <option value="75">75 - Aquisição por ST</option>
+          <option value="98">98 - Outras Entradas</option>
+          <option value="99">99 - Outras Operações</option>
+        </select>
+      </label>
+
+      <label>Alíquota PIS/COFINS (caso haja incidência) *
+        <input type="number" step="0.01" class="efd-piscofins-aliquota" required />
+      </label>
+    </div>
+  </div>
+
+  <!-- 8) Observações (opcional) -->
+   <div class="rule-card">
+  <h3>Observações</h3>
+  <textarea class="obs" placeholder="Informações adicionais..."></textarea>
+</div>
+
+</template>
+
+
+<template id="tplPisCofins">
+  <div class="rule-card">
+    <label >PIS - Situação *
+      <select class="pisSituacao" required>
+        <option value="">Selecione</option>
+        <option value="01">01 - Operação Tributável com Alíquota Básica</option>
+        <option value="02">02 - Operação Tributável com Alíquota Diferenciada</option>
+        <option value="03">03 - Operação Tributável com Alíquota por Unidade</option>
+        <option value="04">04 - Monofásica - Revenda a Alíquota Zero</option>
+        <option value="05">05 - Substituição Tributária</option>
+        <option value="06">06 - Alíquota Zero</option>
+        <option value="07">07 - Isenta</option>
+        <option value="08">08 - Sem Incidência</option>
+        <option value="09">09 - Suspensão</option>
+        <option value="49">49 - Outras Operações</option>
+        <option value="99">99 - Outras Operações</option>
+      </select>
+    </label>
+
+    <label>PIS - Alíquota (%)
+      <input type="number" class="pisAliquota" step="0.01" disabled />
+    </label>
+
+    <label >COFINS - Situação *
+      <select class="cofinsSituacao" required>
+        <option value="">Selecione</option>
+        <option value="01">01 - Operação Tributável com Alíquota Básica</option>
+        <option value="02">02 - Operação Tributável com Alíquota Diferenciada</option>
+        <option value="03">03 - Operação Tributável com Alíquota por Unidade</option>
+        <option value="04">04 - Monofásica - Revenda a Alíquota Zero</option>
+        <option value="05">05 - Substituição Tributária</option>
+        <option value="06">06 - Alíquota Zero</option>
+        <option value="07">07 - Isenta</option>
+        <option value="08">08 - Sem Incidência</option>
+        <option value="09">09 - Suspensão</option>
+        <option value="49">49 - Outras Operações</option>
+        <option value="99">99 - Outras Operações</option>
+      </select>
+    </label>
+
+    <label>COFINS - Alíquota (%)
+      <input type="number" class="cofinsAliquota" step="0.01" disabled />
+    </label>
+  </div>
+</template>
+
+
+  <!-- CT-e (placeholder base) -->
+  <template id="tplCTe">
+    <div class="rule-card">
+      <h3>CT-e (campos base)</h3>
+      <div class="grid3">
+        <div class="rule-card">
+  <h3>Observações</h3>
+  <textarea class="obs" placeholder="Informações adicionais..."></textarea>
+</div>
+      </div>
+    </div>
+  </template>
+
+  <!-- MDF-e (placeholder base) -->
+  <template id="tplMDFe">
+    <div class="rule-card">
+      <h3>MDF-e (campos base)</h3>
+      <div class="grid3">
+         <div class="rule-card">
+  <h3>Observações</h3>
+  <textarea class="obs" placeholder="Informações adicionais..."></textarea>
+</div>
+      </div>
+    </div>
+  </template>
+</section>
+
+
+      <!-- STEP 4 -->
+
+        <div id="configDocs"></div>
+
+        <template id="tplDocConfig">
+          <div class="docCard">
+            <h3 class="docTitle"></h3>
+            <div class="docBody"></div>
+            <div class="grid3">
+              <label>Modo
+                <select class="modo">
+                  <option value="Padrao">Padrão (pré-preenchido)</option>
+                  <option value="Manual">Manual</option>
+                </select>
+              </label>
+
+   
+
+            </div>
+
+            <div class="manualBox" style="display:none;">
+              <div class="grid3">
+                <label>CFOP padrão
+                  <input type="text" class="cfopPadrao" placeholder="Ex.: 5102" />
+                </label>
+                <label>Natureza da operação
+                  <input type="text" class="natOp" placeholder="Ex.: Venda de mercadoria" />
+                </label>
+                <label>Observação
+                  <input type="text" class="obs" placeholder="Opcional" />
+                </label>
+              </div>
+            </div>
+          </div>
+        </template>
+        
+          <template id="tplNFSe">
+
+  <!-- 🔹 Identificação -->
+  <div class="rule-card">
+    <h3>Identificação da NFS-e</h3>
+
+    <div class="grid3">
+      <label>Inscrição Municipal *
+        <input type="text" class="nfse-im" required />
+      </label>
+
+      <label>Série da última NFS-e *
+        <input type="text" class="nfse-serie" placeholder="Ex: 900" required />
+      </label>
+
+      <label>Número da última NFS-e *
+        <input type="number" class="nfse-numero"  placeholder="Ex: 1" required />
+      </label>
+
+      <label>AEDF (se possuir)
+        <input type="text" class="nfse-aedf" />
+      </label>
+
+      <label>Alíquota ISS (%) *
+        <input type="number" step="0.01" class="nfse-iss" required />
+      </label>
+    </div>
+  </div>
+
+  <!-- 🔹 Tributação ISS -->
+  <div class="rule-card">
+    <h3>Tributação do ISS</h3>
+
+    <div class="grid2">
+      <label>Tipo de Tributação *
+        <select class="nfse-tipo-tributacao" required>
+          <option value="">Selecione</option>
+          <option value="1">1 - Isenta de ISS</option>
+          <option value="2">2 - Imune</option>
+          <option value="3">3 - Não Incidência no Município</option>
+          <option value="4">4 - Não Tributável</option>
+          <option value="5">5 - Retida</option>
+          <option value="6">6 - Tributável dentro do município</option>
+          <option value="7">7 - Tributável fora do município</option>
+          <option value="8">8 - Tributável pelo tomador</option>
+        </select>
+      </label>
+
+      <label>Exigibilidade ISS *
+        <select class="nfse-exigibilidade" required>
+          <option value="">Selecione</option>
+          <option value="1">1 - Exigível</option>
+          <option value="2">2 - Não incidência</option>
+          <option value="3">3 - Isenção</option>
+          <option value="4">4 - Exportação</option>
+          <option value="5">5 - Imunidade</option>
+          <option value="6">6 - Suspensa por decisão judicial</option>
+          <option value="7">7 - Suspensa por processo administrativo</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- 🔹 Classificação do Serviço -->
+  <div class="rule-card">
+    <h3>Classificação do Serviço</h3>
+
+    <div class="grid3">
+      <label>Código da Lista de Serviço *
+        <input type="number" class="nfse-lista-servico" required />
+      </label>
+
+      <label>CNAE *
+        <input type="number" class="nfse-cnae" required />
+      </label>
+
+      <label>Código de Tributação do Município *
+        <input type="number" class="nfse-cod-trib-mun" required />
+      </label>
+
+      <label>Código NBS *
+        <input type="number" class="nfse-nbs" required />
+      </label>
+    </div>
+  </div>
+
+  <!-- 🔹 Tributos Aproximados -->
+  <div class="rule-card">
+    <h3>Alíquotas Aproximadas dos Tributos</h3>
+
+    <div class="grid3">
+      <label>Tributos Federais (%) *
+        <input type="number" step="0.01" class="nfse-trib-fed" required />
+      </label>
+
+      <label>Tributos Estaduais (%) *
+        <input type="number" step="0.01" class="nfse-trib-est" required />
+      </label>
+
+      <label>Tributos Municipais (%) *
+        <input type="number" step="0.01" class="nfse-trib-mun" required />
+      </label>
+    </div>
+  </div>
+
+  <!-- 🔹 RPS -->
+  <div class="rule-card">
+    <h3>RPS (Recibo Provisório de Serviços)</h3>
+
+    <div class="grid2">
+      <label>Natureza da Tributação RPS *
+        <select class="nfse-natureza-rps" required>
+          <option value="">Selecione</option>
+          <option value="1">1 - Simples Nacional</option>
+          <option value="2">2 - Fixo</option>
+          <option value="3">3 - Depósito em Juízo</option>
+          <option value="4">4 - Exigibilidade suspensa por decisão judicial</option>
+          <option value="5">5 - Exigibilidade suspensa por procedimento administrativo</option>
+          <option value="6">6 - Isenção parcial</option>
+        </select>
+      </label>
+
+      <label>Regime Especial de Tributação RPS *
+        <select class="nfse-regime-especial" required>
+          <option value="">Selecione</option>
+          <option value="0">0 - Sem Regime Especial</option>
+          <option value="1">1 - Microempresa Municipal</option>
+          <option value="2">2 - Estimativa</option>
+          <option value="3">3 - Sociedade de Profissionais</option>
+          <option value="4">4 - Cooperativa</option>
+          <option value="5">5 - MEI</option>
+          <option value="6">6 - ME / EPP</option>
+          <option value="7">7 - Lucro Real</option>
+          <option value="8">8 - Lucro Presumido</option>
+          <option value="9">9 - Tributação Normal</option>
+          <option value="10">10 - Simples Nacional (Excesso Sublimite)</option>
+          <option value="11">11 - Empresa de Responsabilidade Limitada</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- 🔹 Situação Tributária -->
+  <div class="rule-card">
+    <h3>Situação Tributária do Serviço</h3>
+
+    <div class="grid2">
+      <label>Situação Tributária *
+        <select class="nfse-situacao-trib" required>
+          <option value="">Selecione</option>
+          <option value="0">0 - Tributada integralmente (TI)</option>
+          <option value="1">1 - Tributada integralmente com ISSRF (TIRF)</option>
+          <option value="2">2 - Tributada integralmente e sujeita à Substituição Tributária (TIST)</option>
+          <option value="3">3 - Tributada com redução da base de cálculo (TRBC)</option>
+          <option value="4">4 - Tributada com redução da base de cálculo com ISSRF (TRBCRF)</option>
+          <option value="5">5 - Tributada com redução da base de cálculo e sujeita a Substituição Tributária (TRBCST)</option>
+          <option value="6">6 - Isenta (ISE)</option>
+          <option value="7">7 - Imune (IMU)</option>
+          <option value="8">8 - Não Tributada - ISS regime fixo (NTIFIX)</option>
+          <option value="9">9 - Não Tributada - ISS regime estimativa (NTIEs)</option>
+          <option value="10">10 - Não Tributada - ISS Construção Civil recolhido antecipadamente (NTICC)</option>
+          <option value="15">15 - Não Tributada - Ato Cooperado (NTAC)</option>
+        </select>
+      </label>
+
+      <label>Município Padrão da Prestação *
+        <select class="nfse-municipio-padrao" required>
+          <option value="">Selecione</option>
+          <option value="1">1 - Cliente</option>
+          <option value="2">2 - Empresa</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- 🔹 Regime de Apuração -->
+  <div class="rule-card">
+    <h3>Regime de Apuração</h3>
+
+    <label>Regime de Apuração Tributária *
+      <select class="nfse-regime-apuracao" required>
+        <option value="">Selecione</option>
+        <option value="1">1 - Tributos federais e municipal pelo simples nacional</option>
+        <option value="2">2 - Tributos federais pelo simples nacional e ISSQN por fora do simples nacional</option>
+        <option value="3">3 - Tributos federais e municipal por fora do simples nacional</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- 🔹 Acesso Prefeitura -->
+  <div class="rule-card">
+    <h3>Acesso ao Portal da Prefeitura</h3>
+
+    <div class="grid2">
+      <label>Login Prefeitura *
+        <input type="text" class="nfse-login-pref" required />
+      </label>
+
+      <label>Senha Prefeitura *
+        <input type="text" class="nfse-senha-pref" required />
+      </label>
+    </div>
+  </div>
+
+  <!-- 🔹 Observações -->
+  <div class="rule-card">
+  <h3>Observações</h3>
+  <textarea class="obs" placeholder="Informações adicionais..."></textarea>
+</div>
+
+</template>
+
+
+      <!-- STEP 5 -->
+      <section class="panel" data-panel="4">
+        <h2>Reforma Tributária (IBS/CBS/IS) — opcional</h2>
+
+        <label class="check">
+          <input type="checkbox" id="rt_habilitar" />
+          Incluir dados de IBS/CBS/IS no resumo
+        </label>
+
+     <div id="rt_box" class="box">
+
+  <div class="docTabs" id="rtTabs"></div>
+  <div id="rtTabContent"></div>
+
+</div>
+      </section>
+
+      <template id="tplRTDoc">
+  <div class="docCard">
+    <h3 class="rtDocTitle"></h3>
+
+    <div class="rule-card">
+
+      <label>CST CBS/IBS *
+        <select class="rt_cst"></select>
+      </label>
+
+      <label>Classificação Tributária *
+        <select class="rt_class"></select>
+      </label>
+
+      <div class="grid2">
+        <label>Alíquota CBS (%)
+          <input type="number" step="0.01" class="rt_cbs" />
+        </label>
+
+        <label>Alíquota IBS (%)
+          <input type="number" step="0.01" class="rt_ibs" />
+        </label>
+      </div>
+
+      <label>Deduzir ICMS da base CBS/IBS
+        <select class="rt_deduz_icms">
+          <option value="nao">Não</option>
+          <option value="sim">Sim</option>
+        </select>
+      </label>
+
+      <hr style="margin:20px 0;">
+
+      <label>Crédito Presumido CBS/IBS
+        <select class="rt_credito">
+          <option value="" disabled selected>Selecione</option>
+          <option value="1">1 - Produtor rural</option>
+          <option value="2">2 - Transportador autônomo</option>
+          <option value="3">3 - Reciclagem</option>
+          <option value="4">4 - Bens usados</option>
+          <option value="5">5 - Regime automotivo</option>
+          <option value="6">6 - Regime automotivo art 311</option>
+          <option value="7">7 - ZFM art 444</option>
+          <option value="8">8 - ZFM art 447</option>
+          <option value="9">9 - ZFM art 447</option>
+          <option value="10">10 - ZFM art 450</option>
+          <option value="11">11 - ALC art 462</option>
+          <option value="12">12 - ALC art 465</option>
+          <option value="13">13 - ALC art 467</option>
+        </select>
+      </label>
+
+      <div class="grid2">
+        <label>Percentual Crédito Presumido CBS (%)
+          <input type="number" step="0.01" class="rt_perc_cbs">
+        </label>
+
+        <label>Percentual Crédito Presumido IBS (%)
+          <input type="number" step="0.01" class="rt_perc_ibs">
+        </label>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+
+      <!-- STEP 6 -->
+      <section class="panel" data-panel="5">
+        <h2>Revisão</h2>
+        <div id="previewNice" class="previewNice"></div>
+
+<details class="rawJson">
+  <summary>Ver dados técnicos (JSON)</summary>
+  <pre id="preview"></pre>
+</details>
+
+        <button type="submit" class="btn primary">Enviar para o suporte (gera PDF)</button>
+        <div id="status" class="status"></div>
+      </section>
+
+      <footer class="footer">
+        <button type="button" id="btnPrev" class="btn ghost">Voltar</button>
+        <button type="button" id="btnNext" class="btn">Próximo</button>
+      </footer>
+    </form>
+  </div>
+<div id="toast" class="toast"></div>
+
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
