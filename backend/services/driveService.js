@@ -1,22 +1,17 @@
 import { google } from "googleapis";
-import fs from "fs";
-import path from "path";
 import { Readable } from "stream";
 
 function getAuth() {
-  const credPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  if (!credPath) {
-    throw new Error("GOOGLE_APPLICATION_CREDENTIALS não definido no .env");
+  const credentialsJson = process.env.GOOGLE_CREDENTIALS_JSON;
+
+  if (!credentialsJson) {
+    throw new Error("GOOGLE_CREDENTIALS_JSON não definido");
   }
 
-  const fullPath = path.resolve(process.cwd(), credPath);
-
-  if (!fs.existsSync(fullPath)) {
-    throw new Error(`Credencial não encontrada em: ${fullPath}`);
-  }
+  const credentials = JSON.parse(credentialsJson);
 
   return new google.auth.GoogleAuth({
-    keyFile: fullPath,
+    credentials,
     scopes: ["https://www.googleapis.com/auth/drive"],
   });
 }
