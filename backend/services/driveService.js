@@ -105,8 +105,8 @@ export async function salvarSubmissaoNoDrive({
 }) {
   const drive = await getDrive();
 
- const rootId = process.env.DRIVE_ROOT_FOLDER_ID;
-
+const rootId = "1W3uh2L7U5FIpdlwYXJrML_BiFm9ZDNCM";
+  
 if (!rootId) {
   throw new Error("DRIVE_ROOT_FOLDER_ID não definido no .env");
 }
